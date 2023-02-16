@@ -5,6 +5,8 @@ import numpy as np
 from numpy import floating
 from numpy._typing import NDArray
 
+from libs.dataset.mnist import load_mnist
+
 """
 パーセプトロンのAND,NAND,OR ゲートは、{0,1} が入力値として入ってくる時に
 真理値表に従って{0,1}を出力するようにパラメータを調整して作る.
@@ -62,7 +64,7 @@ def step_function(xs: Union[NDArray[floating], float]):
 
 def sigmoid(xs: Union[NDArray[floating], float]):
     # シグモイド関数
-    return 1 / (1 + np.exp(-x))
+    return 1 / (1 + np.exp(-xs))
 
 
 def relu(xs: Union[NDArray[floating], float]):
@@ -80,11 +82,78 @@ def softmax(xs: NDArray[floating]):
     return y
 
 
+def sum_squared_error(y, t):
+    return 0.5 * np.sum((y - t) ** 2)
+
+
+def cross_entropy_error(y, t):
+    # np.log(0) のような計算が発生した際に、np.log(0) はマイナス無限大 -inf になって、それ以上計算を進められなくなってしまうためその防止策.
+    # sample
+    # y = [0.1, 0.05, 0.1, 0.0, 0.05, 0.1, 0.0, 0.6, 0.0, 0.0]
+    # t = [0,0,1,0,0,0,0,0,0,0]
+    # cross_entropy_error(np.array(y),np.array(t))
+    # > 2.302584092994546
+    # 2データ以上の場合
+    # y2=np.array([[0.1, 0.05, 0.1, 0.0, 0.05, 0.1, 0.0, 0.6, 0.0, 0.0] * 10]).reshape(10,10)
+    # _, t = get_data()
+    # cross_entropy_error(np.array(y2),np.array(t))
+    # > 6.7938106506644
+
+    delta = 1e-7
+    if y.ndim == 1:
+        t = t.reshape(1, t.size)
+        y = y.reshape(1, y.size)
+
+    batch_size = y.shape[0]
+    return -np.sum(t * np.log(y + delta)) / batch_size
+
+
+def cross_entropy_error_label(y, t):
+    # 教師データがone-hot ではなく、ラベルの場合
+    delta = 1e-7
+    if y.ndim == 1:
+        t = t.reshape(1, t.size)
+        y = y.reshape(1, y.size)
+
+    batch_size = y.shape[0]
+
+    # np.arnage で 0~batch_size のiter を作る. 0,1,2...batch_size-1
+    # t がラベルだから、そのindex として使われる.
+    # y.shape は[データ数, ラベル数]だから、2d 配列のindexing を行っている.
+    # 2d-inding で正解していれば、その数値が大きく、0 ならdelta をつけてinf 防止策を入れて、その合計を計算.
+    # sample
+    # _, t = batch(batch_size=10,one_hot_label=False)
+    # y2=np.array([[0.1, 0.05, 0.1, 0.0, 0.05, 0.1, 0.0, 0.6, 0.0, 0.0] * 10]).reshape(10,10)
+    # cross_entropy_error_label(y2, t)
+    # > 7.788242088702825
+
+    return -np.sum(np.log(y[np.arange(batch_size), t] + delta)) / batch_size
+
+
+def get_data(one_hot_label=True):
+    (x_train, t_train), (x_test, t_test) = load_mnist(
+        flatten=True, normalize=False, one_hot_label=one_hot_label
+    )
+    return (x_train, t_train), (x_test, t_test)
+
+
+def batch(batch_size: int = 10, one_hot_label=True):
+    (x_train, t_train), _ = get_data(one_hot_label)
+    data_size = x_train.shape[0]
+    mask = np.random.choice(data_size, batch_size)
+    x_batch = x_train[mask]
+    t_batch = t_train[mask]
+    return x_batch, t_batch
+
+
 if __name__ == "__main__":
     x = np.arange(-5.0, 5.0, 0.1)
     # y = step_function(x)  # ブロードキャスト
     # y = sigmoid(x)
-    y = relu(x)
-    plt.plot(x, y)
-    plt.ylim(-0.1, 5.0)
-    plt.show()
+    # y = relu(x)
+    # plt.plot(x, y)
+    # plt.ylim(-0.1, 5.0)
+    # plt.show()
+    import ipdb as pdb
+
+    pdb.set_trace()
