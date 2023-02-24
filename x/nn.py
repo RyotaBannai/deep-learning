@@ -4,7 +4,7 @@ import numpy as np
 
 from libs.dataset.mnist import load_mnist
 
-from .logic import sigmoid, softmax
+from .functions import sigmoid, softmax
 
 
 def get_test_data():

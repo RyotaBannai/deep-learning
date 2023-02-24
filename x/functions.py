@@ -67,19 +67,35 @@ def sigmoid(xs: Union[NDArray[floating], float]):
     return 1 / (1 + np.exp(-xs))
 
 
+def sigmoid_grad(x):
+    return (1.0 - sigmoid(x)) * sigmoid(x)
+
+
 def relu(xs: Union[NDArray[floating], float]):
     # ReLU関数
     return np.maximum(0, xs)
 
 
-def softmax(xs: NDArray[floating]):
+def relu_grad(x):
+    grad = np.zeros_like(x)
+    grad[x >= 0] = 1
+    return grad
+
+
+def softmax(x: NDArray[floating]):
     # ソフトマックス関数
     # k層の全ニューロンの出力値の合計でk層のi番目ニューロンの出力値を割る
-    c_prime = np.max(xs)
-    exp_a = np.exp(xs - c_prime)  # オーバーフロー対策
-    sum_exp_a = np.sum(exp_a)
-    y = exp_a / sum_exp_a
-    return y
+    x = x - np.max(x, axis=-1, keepdims=True)  # オーバーフロー対策
+    #  If axis is negative it counts from the last to the first axis.
+    return np.exp(x) / np.sum(np.exp(x), axis=-1, keepdims=True)
+
+    # n-D 一度に計算する.
+    # 1行が１つのoutput 層だから、１行の和が１になるように計算
+    # softmax(np.array([[0, 1], [1, 2], [2,3]]))
+    # array([[0.26894142, 0.73105858],
+    #       [0.26894142, 0.73105858],
+    #       [0.26894142, 0.73105858]])
+    #
 
 
 def sum_squared_error(y, t):
@@ -99,13 +115,18 @@ def cross_entropy_error(y, t):
     # cross_entropy_error(np.array(y2),np.array(t))
     # > 6.7938106506644
 
-    delta = 1e-7
     if y.ndim == 1:
         t = t.reshape(1, t.size)
         y = y.reshape(1, y.size)
 
+    # 教師データが「one-hot-vector」の場合、
+    # 正解ラベルのインデックスに変換（ラベルデータに変換する）
+    if t.size == y.size:
+        t = t.argmax(axis=1)
+
     batch_size = y.shape[0]
-    return -np.sum(t * np.log(y + delta)) / batch_size
+
+    return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
 
 
 def cross_entropy_error_label(y, t):
@@ -154,6 +175,3 @@ if __name__ == "__main__":
     # plt.plot(x, y)
     # plt.ylim(-0.1, 5.0)
     # plt.show()
-    import ipdb as pdb
-
-    pdb.set_trace()
