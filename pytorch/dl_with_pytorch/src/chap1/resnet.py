@@ -1,3 +1,7 @@
+"""
+ResNet で入力画像がなんであるか、1000 種類ほどのクラスへ分類する
+"""
+
 # %%
 import numpy as np
 import torch
@@ -26,14 +30,14 @@ preprocess = transforms.Compose(
         ),  # RGB 成分を予め定義された平均と標準偏差で正規化（ここでは標準化）
     ]
 )
-img = Image.open("../data/p1ch2/bobby.jpg")
+img = Image.open("../../data/p1ch2/bobby.jpg")
 img_t = preprocess(img)
 batch_t = torch.unsqueeze(img_t, 0)
 
 # %%
 
-# 推論を行うために、ネットワークをevail モードに切り替える
-# 切り替えないと、バッチ正規化やドロップアウトなどの処理内容が混じってしまう
+# 推論を行うために、ネットワークをeval モードに切り替える
+# 切り替えないと、バッチ正規化やドロップアウトなどの処理が混じってしまう
 resnet.eval()
 out = resnet(batch_t)
 
