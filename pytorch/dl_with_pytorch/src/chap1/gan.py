@@ -112,7 +112,7 @@ netG.eval()
 # %%
 
 preprocess = transforms.Compose([transforms.Resize(256), transforms.ToTensor()])
-img = Image.open("../../data/p1ch2/horse.jpg")
+img = Image.open("../../data/p1ch2/bobby.jpg")
 img_t = preprocess(img)
 batch_t = torch.unsqueeze(img_t, 0)
 batch_out = netG(batch_t)  # 生成器の出力であり、画像を変換できた
