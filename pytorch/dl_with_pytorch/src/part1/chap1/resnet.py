@@ -30,7 +30,7 @@ preprocess = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # ??
     ]
 )
-img = Image.open("../../data/p1ch2/bobby.jpg")
+img = Image.open("../../../data/p1ch2/bobby.jpg")
 img_t = preprocess(img)
 batch_t = torch.unsqueeze(img_t, 0)  # ??
 
@@ -43,7 +43,7 @@ out = resnet(batch_t)
 
 # %%
 # 推論結果からラベルの最もクラスの推論確率が高いindex をlist から取り出す.
-with open("../../data/p1ch2/imagenet_classes.txt") as f:
+with open("../../../data/p1ch2/imagenet_classes.txt") as f:
     labels = [line.strip() for line in f.readlines()]
 
 # 推論結果

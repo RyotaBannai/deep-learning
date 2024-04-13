@@ -105,14 +105,14 @@ class ResNetGenerator(nn.Module):
 netG = ResNetGenerator()
 # 事前にウマとシマウマの画像1068枚、1335枚の２つのセットからなるトレーニングセットで事前に訓練された生成モデルの重みファイル
 # 生成器は入力された画像データから、１頭または複数のウマを認識し、出力が本物のシマウマに見えるように、各ピクセルの値を個別に変更する
-model_path = "../../data/p1ch2/horse2zebra_0.4.0.pth"
+model_path = "../../../data/p1ch2/horse2zebra_0.4.0.pth"
 model_data = torch.load(model_path)
 netG.load_state_dict(model_data)
 netG.eval()
 # %%
 
 preprocess = transforms.Compose([transforms.Resize(256), transforms.ToTensor()])
-img = Image.open("../../data/p1ch2/bobby.jpg")
+img = Image.open("../../../data/p1ch2/bobby.jpg")
 img_t = preprocess(img)
 batch_t = torch.unsqueeze(img_t, 0)
 batch_out = netG(batch_t)  # 生成器の出力であり、画像を変換できた

@@ -1,1 +1,8 @@
-data
+.vscode
+
+# training/test data
+data 
+# TensorBoard log folder
+runs 
+# best model binary file
+*.state
